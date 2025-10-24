@@ -5,10 +5,13 @@ use email_serv::http;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // setup configuration
     dotenv::dotenv().ok();
     env_logger::init();
     let config = Config::parse();
 
-    println!("{:?}", config.db_conn);
+    // start the server
+    http::serve(config).await?;
+
     Ok(())
 }
