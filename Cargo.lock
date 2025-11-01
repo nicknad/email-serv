@@ -204,6 +204,7 @@ dependencies = [
  "clap",
  "dotenv",
  "env_logger",
+ "parking_lot",
  "serde",
  "thiserror",
  "tokio",
