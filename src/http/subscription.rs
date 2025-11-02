@@ -1,16 +1,15 @@
 use axum::Router;
-use axum::extract::{State, Json};
-use axum::http::StatusCode;
-use axum::routing::{post, get};
 use axum::extract::Query;
-use crate::http::SubscriptionEmail;
-
+use axum::extract::{Json, State};
+use axum::http::StatusCode;
+use axum::routing::{get, post};
 
 use crate::http::ApiContext;
+use crate::http::SubscriptionEmail;
 
 #[derive(serde::Deserialize)]
 struct SubscriptionRequest {
-    email: String
+    email: String,
 }
 
 #[derive(serde::Deserialize)]
@@ -27,33 +26,49 @@ fn hash_email(email: &str, key: &[u8; 32]) -> String {
 //Extractors always run in the order of the function parameters that is from left to right.
 //
 //The request body is an asynchronous stream that can only be consumed once. Therefore you can only have one extractor that consumes the request body. axum enforces this by requiring such extractors to be the last argument your handler takes.
-pub async fn subscribe(State(context): State<ApiContext>, Json(body): Json<SubscriptionRequest>) -> (StatusCode, String) {
+pub async fn subscribe(
+    State(context): State<ApiContext>,
+    Json(body): Json<SubscriptionRequest>,
+) -> (StatusCode, String) {
     if body.email.is_empty() {
         return (StatusCode::BAD_REQUEST, "Email is empty".to_string());
     }
 
     // Todo add email validation
 
-    let email_hash = hash_email(&body.email, &context.blake3_key);    
+    let email_hash = hash_email(&body.email, &context.blake3_key);
     let mut email_hashmap = context.emails.lock();
-    if email_hashmap.is_empty()
-    {
-        email_hashmap.insert(email_hash, SubscriptionEmail { email: body.email, is_verified: false });
+    if email_hashmap.is_empty() {
+        email_hashmap.insert(
+            email_hash,
+            SubscriptionEmail {
+                email: body.email,
+                is_verified: false,
+            },
+        );
 
-        return (StatusCode::OK ,format!("Subscribed!"));
+        return (StatusCode::OK, format!("Subscribed!"));
     }
 
-    if email_hashmap.contains_key(&email_hash) {     
-        return (StatusCode::OK ,format!("Subscribed!"));
+    if email_hashmap.contains_key(&email_hash) {
+        return (StatusCode::OK, format!("Subscribed!"));
     }
 
-    email_hashmap.insert(email_hash, SubscriptionEmail { email: body.email, is_verified: false });
+    email_hashmap.insert(
+        email_hash,
+        SubscriptionEmail {
+            email: body.email,
+            is_verified: false,
+        },
+    );
 
-   
-    (StatusCode::OK ,format!("Subscribed!"))
+    (StatusCode::OK, format!("Subscribed!"))
 }
 
-pub async fn verify_subscription(State(context): State<ApiContext>, Query(params): Query<UnsubscribeParams>) -> StatusCode {
+pub async fn verify_subscription(
+    State(context): State<ApiContext>,
+    Query(params): Query<UnsubscribeParams>,
+) -> StatusCode {
     if params.token.is_empty() {
         return StatusCode::BAD_REQUEST;
     }
@@ -66,7 +81,10 @@ pub async fn verify_subscription(State(context): State<ApiContext>, Query(params
     StatusCode::OK
 }
 
-pub async fn unsubscribe(State(context): State<ApiContext>, Query(params): Query<UnsubscribeParams>) -> StatusCode { 
+pub async fn unsubscribe(
+    State(context): State<ApiContext>,
+    Query(params): Query<UnsubscribeParams>,
+) -> StatusCode {
     if params.token.is_empty() {
         return StatusCode::BAD_REQUEST;
     }
@@ -83,4 +101,3 @@ pub fn router() -> Router<ApiContext> {
         .route("/api/verify", get(verify_subscription))
         .route("/api/unsubscribe", get(unsubscribe))
 }
-

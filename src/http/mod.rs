@@ -4,9 +4,12 @@ use axum::{
     http::{StatusCode, Uri},
     routing::get,
 };
-use std::{collections::HashMap, net::{IpAddr, Ipv4Addr, SocketAddr}};
-use std::sync::Arc;
 use parking_lot::Mutex;
+use std::sync::Arc;
+use std::{
+    collections::HashMap,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+};
 mod error;
 mod subscription;
 
@@ -27,7 +30,7 @@ pub async fn fallback(uri: Uri) -> (StatusCode, String) {
 }
 
 pub fn create_router(context: ApiContext) -> Router {
-   let router = Router::new()
+    let router = Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .merge(subscription::router())
         .fallback(fallback)
@@ -38,11 +41,11 @@ pub fn create_router(context: ApiContext) -> Router {
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
     let mut key_array = [0u8; 32];
-    hex::decode_to_slice(config.blake3_key, &mut key_array as &mut[u8])?;
+    hex::decode_to_slice(config.blake3_key, &mut key_array as &mut [u8])?;
 
-    let context = ApiContext { 
-            emails: Arc::new(Mutex::new(HashMap::new())), 
-            blake3_key: key_array
+    let context = ApiContext {
+        emails: Arc::new(Mutex::new(HashMap::new())),
+        blake3_key: key_array,
     };
 
     let router = create_router(context);

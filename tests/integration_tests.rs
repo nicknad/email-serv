@@ -1,10 +1,10 @@
 mod tests {
     use axum::{body::Body, extract::Request, http::StatusCode};
-    use tower::{Service, ServiceExt}; // for `call`, `oneshot`, and `ready`
-    use email_serv::http::create_router;
     use email_serv::http::ApiContext;
-    use std::sync::Arc;
+    use email_serv::http::create_router;
     use parking_lot::Mutex;
+    use std::sync::Arc;
+    use tower::{Service, ServiceExt}; // for `call`, `oneshot`, and `ready`
 
     #[tokio::test]
     async fn test_fallback() {
@@ -55,7 +55,6 @@ mod tests {
                     .method(axum::http::Method::POST)
                     .uri("/api/unsubscribe")
                     .body(Body::empty())
-            
                     .unwrap(),
             )
             .await
@@ -73,7 +72,7 @@ mod tests {
         let response = app
             .oneshot(
                 Request::builder()
-                     .method(axum::http::Method::POST)
+                    .method(axum::http::Method::POST)
                     .uri("/api/subscribe")
                     .body(Body::empty())
                     .unwrap(),
