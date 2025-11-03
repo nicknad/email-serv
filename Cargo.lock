@@ -247,6 +247,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "hex",
+ "mime",
  "parking_lot",
  "serde",
  "thiserror",
