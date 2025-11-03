@@ -2,10 +2,11 @@ mod tests {
     const HEX_KEY: &str = "327da54c32bbda6f1b56c2e248620d31324b6bf5664fc31ab4d455f38787a5fa";
 
     use axum::{body::Body, extract::Request, http::StatusCode};
-    use email_serv::http;
+    use bytes::Bytes;
     use email_serv::http::ApiContext;
     use email_serv::http::SubscriptionEmail;
     use email_serv::http::create_router;
+    use http_body_util::Full;
     use mime::Mime;
     use parking_lot::Mutex;
     use std::collections::HashMap;
@@ -153,5 +154,36 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_body_length() {
+        let mut array = [0u8; 32];
+        hex::decode_to_slice(HEX_KEY, &mut array as &mut [u8]).unwrap();
+        let context = ApiContext {
+            emails: Arc::new(Mutex::new(HashMap::new())),
+            blake3_key: array,
+        };
+        let app = create_router(context);
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method(axum::http::Method::POST)
+                    .uri("/api/subscribe")
+                    .header(
+                        axum::http::header::CONTENT_TYPE,
+                        mime::APPLICATION_JSON.as_ref(),
+                    )
+                    .header(
+                        http::header::CONTENT_LENGTH,
+                        http::HeaderValue::from_static("10000000"),
+                    )
+                    .body(Full::<Bytes>::default())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
     }
 }

@@ -10,6 +10,8 @@ use std::{
     collections::HashMap,
     net::{IpAddr, Ipv4Addr, SocketAddr},
 };
+use tower_http::limit::RequestBodyLimitLayer;
+
 mod error;
 mod subscription;
 
@@ -34,6 +36,7 @@ pub fn create_router(context: ApiContext) -> Router {
         .route("/health_check", get(|| async { StatusCode::OK }))
         .merge(subscription::router())
         .fallback(fallback)
+        .layer(RequestBodyLimitLayer::new(4 * 1024 * 1024))
         .with_state(context);
 
     router

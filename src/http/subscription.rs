@@ -8,13 +8,13 @@ use crate::http::ApiContext;
 use crate::http::SubscriptionEmail;
 
 #[derive(serde::Deserialize)]
-struct SubscriptionRequest {
-    email: String,
+pub struct SubscriptionRequest {
+    pub email: String,
 }
 
 #[derive(serde::Deserialize)]
-struct UnsubscribeParams {
-    token: String,
+pub struct UnsubscribeParams {
+    pub token: String,
 }
 
 fn hash_email(email: &str, key: &[u8; 32]) -> String {
