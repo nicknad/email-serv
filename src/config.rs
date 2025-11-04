@@ -9,4 +9,7 @@ pub struct Config {
 
     #[clap(long, env)]
     pub blake3_key: String,
+
+    #[clap(long, env, required = false)]
+    pub log_dir: String,
 }
