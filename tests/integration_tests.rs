@@ -27,6 +27,7 @@ mod tests {
             .oneshot(
                 Request::builder()
                     .uri("/gibberish")
+                    .header("X-Forwarded-For", "127.0.0.1")
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -48,6 +49,7 @@ mod tests {
             .oneshot(
                 Request::builder()
                     .uri("/health_check")
+                    .header("X-Forwarded-For", "127.0.0.1")
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -82,6 +84,7 @@ mod tests {
             .oneshot(
                 Request::builder()
                     .method(axum::http::Method::GET)
+                    .header("X-Forwarded-For", "127.0.0.1")
                     .uri(format!("/api/unsubscribe?token={}", hash))
                     .body(Body::empty())
                     .unwrap(),
@@ -119,6 +122,7 @@ mod tests {
             .oneshot(
                 Request::builder()
                     .method(axum::http::Method::GET)
+                    .header("X-Forwarded-For", "127.0.0.1")
                     .uri(format!("/api/verify?token={}", hash))
                     .body(Body::empty())
                     .unwrap(),
@@ -147,6 +151,7 @@ mod tests {
                         axum::http::header::CONTENT_TYPE,
                         mime::APPLICATION_JSON.as_ref(),
                     )
+                    .header("X-Forwarded-For", "127.0.0.1")
                     .body(Body::from(String::from("{\"email\": \"test@email.de\"}")))
                     .unwrap(),
             )
@@ -174,6 +179,7 @@ mod tests {
                         axum::http::header::CONTENT_TYPE,
                         mime::APPLICATION_JSON.as_ref(),
                     )
+                    .header("X-Forwarded-For", "127.0.0.1")
                     .header(
                         http::header::CONTENT_LENGTH,
                         http::HeaderValue::from_static("10000000"),
