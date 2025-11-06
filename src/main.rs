@@ -12,11 +12,11 @@ fn init_logging(config: &Config) {
     }
 
     let file_appender = tracing_appender::rolling::RollingFileAppender::new(
-        tracing_appender::rolling::Rotation::DAILY, 
+        tracing_appender::rolling::Rotation::DAILY,
         log_dir,
-        "api.log", 
+        "api.log",
     );
-    
+
     let (non_blocking_appender, _guard) = tracing_appender::non_blocking(file_appender);
 
     tracing_subscriber::Registry::default()
@@ -35,8 +35,11 @@ fn init_logging(config: &Config) {
                 .with_filter(tracing_subscriber::EnvFilter::new("error")),
         )
         .init();
-        
-    tracing::info!("Tracing initialized and writing to file: {}", log_dir.join("api.log").display());
+
+    tracing::info!(
+        "Tracing initialized and writing to file: {}",
+        log_dir.join("api.log").display()
+    );
 }
 
 #[tokio::main]
