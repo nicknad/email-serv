@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT OR IGNORE INTO subscriptions (email_hash, email, is_verified) VALUES (?, ?, 0)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "a4b7c490f97652e9009fd548af0d1984e372de95424d7b250013af8fda08a129"
+}

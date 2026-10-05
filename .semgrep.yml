@@ -1,0 +1,106 @@
+# Semgrep rules for email-serv.
+#
+# Run: semgrep scan --config .semgrep.yml --error
+#
+# These rules encode project-specific security conventions (see AGENTS.md)
+# on top of Semgrep's registry rules (`--config p/rust` / `p/secrets`).
+rules:
+  - id: email-serv-no-raw-email-logging
+    languages: [rust]
+    severity: ERROR
+    message: >-
+      Do not log raw email addresses (PII). Hash the address with the keyed
+      Blake3 helper first and log the hash instead. A variable whose name ends
+      in `_hash` (e.g. `email_hash`) is exempt.
+    metadata:
+      category: security
+      cwe:
+        - "CWE-532: Insertion of Sensitive Information into Log File"
+    # Structural matching on Rust macro arguments is unreliable (multi-line
+    # invocations and `$LEVEL` macro names are not matched), so this rule uses
+    # a regex over the log call instead.
+    pattern-regex: |-
+      tracing::(?:info|debug|warn|error|trace)!\([^;]*(?<!["'\w])(?!\w*_hash\b)\w*email\w*(?!["'\w])[^;]*\)
+
+  - id: email-serv-no-unwrap-in-http
+    languages: [rust]
+    severity: WARNING
+    message: >-
+      Avoid `unwrap()` in HTTP handlers. Return `EmailServError` via `?` so
+      clients get a structured JSON error instead of a panic.
+    metadata:
+      category: correctness
+    paths:
+      include:
+        - "**/src/http/"
+    pattern: $X.unwrap()
+
+  - id: email-serv-no-print-macros
+    languages: [rust]
+    severity: WARNING
+    message: >-
+      Use `tracing` instead of `println!`/`eprintln!` so logs stay structured
+      (JSON) and free of PII.
+    metadata:
+      category: best-practice
+    pattern-either:
+      - pattern: println!(...)
+      - pattern: eprintln!(...)
+
+  - id: email-serv-no-formatted-sql
+    languages: [rust]
+    severity: ERROR
+    message: >-
+      Never build SQL with `format!`. Use bound parameters (`?`/`.bind()` or
+      the `sqlx::query!` macros) to avoid SQL injection.
+    metadata:
+      category: security
+      cwe:
+        - "CWE-89: SQL Injection"
+    pattern-either:
+      - pattern: sqlx::query(&format!(...))
+      - pattern: sqlx::query(format!(...))
+      - pattern: sqlx::query_as(&format!(...))
+      - pattern: sqlx::query_as(format!(...))
+
+  - id: email-serv-no-hardcoded-secret-assignment
+    languages: [rust]
+    severity: ERROR
+    message: >-
+      Hardcoded secret detected. Load credentials from environment variables
+      (`Config` via clap `env`) instead of literals.
+    metadata:
+      category: security
+      cwe:
+        - "CWE-798: Use of Hard-coded Credentials"
+    patterns:
+      - pattern: $VAR = "$VALUE"
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: (?i).*?(api_key|apikey|secret|password|passwd|token).*
+
+  - id: email-serv-no-hardcoded-secret-struct-literal
+    languages: [rust]
+    severity: ERROR
+    message: >-
+      Hardcoded secret detected in a struct literal. Load credentials from
+      environment variables (`Config` via clap `env`) instead of literals.
+    metadata:
+      category: security
+      cwe:
+        - "CWE-798: Use of Hard-coded Credentials"
+    paths:
+      exclude:
+        - tests/
+    pattern-regex: |-
+      (?i)\b\w*(api_key|apikey|secret|password|passwd|token)\w*\s*:\s*"[^"]+"
+
+  - id: email-serv-no-unsafe
+    languages: [rust]
+    severity: WARNING
+    message: >-
+      `unsafe` block found. This service has no legitimate need for unsafe
+      code; justify and document any exception.
+    metadata:
+      category: security
+    pattern: unsafe { ... }

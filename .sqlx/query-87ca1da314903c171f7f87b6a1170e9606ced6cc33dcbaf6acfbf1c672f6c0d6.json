@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT\n                COUNT(*) as \"total!: i64\",\n                COALESCE(SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END), 0) as \"sent!: i64\",\n                COALESCE(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END), 0) as \"failed!: i64\",\n                COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) as \"pending!: i64\"\n             FROM broadcast_recipients WHERE broadcast_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "total!: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "sent!: i64",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "failed!: i64",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "pending!: i64",
+        "ordinal": 3,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "87ca1da314903c171f7f87b6a1170e9606ced6cc33dcbaf6acfbf1c672f6c0d6"
+}

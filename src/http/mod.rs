@@ -1,39 +1,47 @@
 use crate::config::Config;
+use crate::database::Database;
 use axum::{
     Router,
     http::{StatusCode, Uri},
+    response::IntoResponse,
     routing::get,
 };
-use parking_lot::Mutex;
-use std::sync::Arc;
 use std::{
-    collections::HashMap,
     net::{IpAddr, Ipv4Addr, SocketAddr},
+    sync::Arc,
 };
 use tower_governor::{
     GovernorLayer, governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor,
 };
 use tower_http::limit::RequestBodyLimitLayer;
 
-mod error;
-mod subscription;
+pub mod admin;
+pub mod error;
+pub mod subscription;
+
+pub use error::EmailServError;
+
+use crate::email::EmailService;
 
 #[derive(Clone)]
 pub struct ApiContext {
-    pub emails: Arc<Mutex<HashMap<String, SubscriptionEmail>>>,
+    pub db: Database,
     pub blake3_key: [u8; 32],
+    pub site_url: String,
+    pub admin_api_key: String,
+    pub email_service: EmailService,
 }
 
-#[derive(Clone)]
-pub struct SubscriptionEmail {
-    pub email: String,
-    pub is_verified: bool,
-}
-
-pub async fn fallback(uri: Uri) -> (StatusCode, String) {
+pub async fn fallback(uri: Uri) -> impl IntoResponse {
     (StatusCode::NOT_FOUND, format!("No route for {uri}"))
 }
 
+/// Builds the application router.
+///
+/// Middleware order (outermost first):
+/// 1. rate limiting (per client IP)
+/// 2. request body limit (2 MiB)
+/// 3. routes
 pub fn create_router(context: ApiContext) -> Router {
     let governor_conf = Arc::new(
         GovernorConfigBuilder::default()
@@ -41,45 +49,53 @@ pub fn create_router(context: ApiContext) -> Router {
             .burst_size(5)
             .key_extractor(SmartIpKeyExtractor)
             .finish()
-            .unwrap(),
+            .expect("Rate limit config failed"),
     );
 
-    let governor_limiter = governor_conf.limiter().clone();
-    let interval = std::time::Duration::from_secs(60);
-    // a separate background task to clean up
-    std::thread::spawn(move || {
+    // Periodically drop rate-limit entries for clients that stopped calling,
+    // otherwise the in-memory map grows without bound.
+    let limiter = governor_conf.limiter().clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(60));
         loop {
-            std::thread::sleep(interval);
-            tracing::info!("rate limiting storage size: {}", governor_limiter.len());
-            governor_limiter.retain_recent();
+            interval.tick().await;
+            tracing::debug!("Rate limiting storage size: {}", limiter.len());
+            limiter.retain_recent();
         }
     });
 
-    let router = Router::new()
+    Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .merge(subscription::router())
+        .merge(admin::router())
         .fallback(fallback)
         .layer(RequestBodyLimitLayer::new(2 * 1024 * 1024))
         .layer(GovernorLayer::new(governor_conf))
-        .with_state(context);
-
-    router
+        .with_state(context)
 }
 
-pub async fn serve(config: Config) -> anyhow::Result<()> {
+pub async fn serve(
+    config: Config,
+    db: Database,
+    email_service: EmailService,
+) -> anyhow::Result<()> {
     let mut key_array = [0u8; 32];
-    hex::decode_to_slice(config.blake3_key, &mut key_array as &mut [u8])?;
+    hex::decode_to_slice(&config.blake3_key, &mut key_array)?;
 
     let context = ApiContext {
-        emails: Arc::new(Mutex::new(HashMap::new())),
+        db,
         blake3_key: key_array,
+        site_url: config.site_url,
+        admin_api_key: config.admin_api_key,
+        email_service,
     };
 
     let router = create_router(context);
     let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), config.port);
-    let listener = tokio::net::TcpListener::bind(socket).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(socket).await?;
 
-    axum::serve(listener, router).await.unwrap();
+    tracing::info!("Server listening on {}", socket);
+    axum::serve(listener, router).await?;
 
     Ok(())
 }

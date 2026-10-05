@@ -1,0 +1,27 @@
+# Build artifacts
+target/
+
+# Development files
+.git/
+.gitignore
+.env
+.env.sample
+
+# Documentation
+README.md
+AGENTS.md
+LICENSE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+*.rs.bk
+
+# CI/CD
+.github/
+.gitlab-ci.yml

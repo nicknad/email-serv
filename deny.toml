@@ -1,0 +1,71 @@
+# cargo-deny configuration
+#
+# Run: cargo deny check
+# Docs: https://embarkstudios.github.io/cargo-deny/
+#
+# This project ships as a small Rust service (see Dockerfile), so the checks
+# are intentionally strict: security advisories and unknown registries fail the
+# build, while duplicate versions only warn (they are usually transitive).
+
+[graph]
+# Only check the dependency graph we actually build for:
+# - the Docker image target (musl)
+# - the developer host (Windows MSVC)
+targets = [
+    "x86_64-unknown-linux-musl",
+    "x86_64-pc-windows-msvc",
+]
+all-features = false
+no-default-features = false
+
+[advisories]
+# Fail on known vulnerabilities and unmaintained crates.
+# When ignoring an advisory, always add an `id` + `reason` pair here.
+ignore = []
+
+[licenses]
+# Allow list covers the permissive licenses used by the dependency tree.
+# Copyleft (GPL/AGPL/LGPL) is intentionally NOT allowed except through the
+# per-crate exception below.
+allow = [
+    "0BSD",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "CC0-1.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+]
+confidence-threshold = 0.8
+
+exceptions = [
+    # r-efi is triple-licensed "MIT OR Apache-2.0 OR LGPL-2.1-or-later" and
+    # only reaches the tree via getrandom on UEFI targets. The MIT option is
+    # covered by the allow list, so no exception is needed today. Re-add one
+    # here (with a reason) if a future dependency really requires a copyleft
+    # license.
+]
+
+[bans]
+# Duplicate versions are common in transitive trees and only cost build time.
+multiple-versions = "warn"
+# Never allow wildcard version requirements (`*`).
+wildcards = "deny"
+deny = [
+    # dotenv is unmaintained (RUSTSEC-2021-0141); dotenvy is the drop-in fork.
+    { crate = "dotenv", reason = "unmaintained; use dotenvy instead" },
+]
+
+[sources]
+# Only crates.io is trusted; fail if a dependency starts coming from a git
+# repository or an unknown registry.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

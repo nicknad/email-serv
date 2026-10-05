@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO email_outbox (subscriber_id, recipient_email, email_type, subject, template_path, context_json, broadcast_id) VALUES (?, ?, 'broadcast', ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "04430294b7d59d85e838cc7113ab09a11e6c96a9e3fb99b3998350549d81a365"
+}

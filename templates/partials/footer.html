@@ -1,0 +1,9 @@
+<div class="footer">
+    <p>&copy; {{ now(format="%Y") }} Email-Serv. All rights reserved.</p>
+    <p>
+        Sent to: {{ subscriber_email }} 
+        {% if unsubscribe_url %}
+        | <a href="{{ unsubscribe_url | safe }}">Unsubscribe</a>
+        {% endif %}
+    </p>
+</div>

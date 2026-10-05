@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE subscriptions \n            SET is_verified = 1, updated_at = datetime('now') \n            WHERE email_hash = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "8e4c7a5a92d8b500d2e7269534d07e0e3dcc2b6ede300bd8d29e382808dd50b3"
+}

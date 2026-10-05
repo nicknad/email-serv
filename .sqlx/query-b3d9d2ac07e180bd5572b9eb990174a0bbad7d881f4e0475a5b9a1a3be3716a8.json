@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE broadcast_recipients SET status = ?, error_message = ? WHERE broadcast_id = ? AND subscriber_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "b3d9d2ac07e180bd5572b9eb990174a0bbad7d881f4e0475a5b9a1a3be3716a8"
+}

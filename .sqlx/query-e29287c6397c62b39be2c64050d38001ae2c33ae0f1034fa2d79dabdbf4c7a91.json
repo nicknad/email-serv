@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO broadcast_recipients (broadcast_id, subscriber_id, status) VALUES (?, ?, 'pending')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "e29287c6397c62b39be2c64050d38001ae2c33ae0f1034fa2d79dabdbf4c7a91"
+}

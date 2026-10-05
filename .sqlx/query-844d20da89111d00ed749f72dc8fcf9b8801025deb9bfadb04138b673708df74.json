@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE email_outbox SET status = 'failed', last_error = ?, retry_count = retry_count + 1 WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "844d20da89111d00ed749f72dc8fcf9b8801025deb9bfadb04138b673708df74"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE email_outbox\n             SET retry_count = retry_count + 1,\n                 last_error = ?,\n                 status = CASE WHEN retry_count + 1 < ? THEN 'pending' ELSE 'failed' END\n             WHERE id = ?\n             RETURNING status as \"status!: String\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "status!: String",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "15f32e6eed16f97c0dc3a7ea75e7d1a62e99843e805d97a0e3828b735f55f41b"
+}

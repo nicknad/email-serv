@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO broadcasts (subject, template_path, status) VALUES (?, ?, 'pending')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "080d5eadc50800aaff39c4aac32a3908b85b8244bb07d1d66a6897293f8bf265"
+}

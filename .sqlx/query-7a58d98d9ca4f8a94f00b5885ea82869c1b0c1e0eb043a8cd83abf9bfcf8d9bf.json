@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE broadcasts SET total_recipients = ?, success_count = ?, failure_count = ?, status = ?, completed_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "7a58d98d9ca4f8a94f00b5885ea82869c1b0c1e0eb043a8cd83abf9bfcf8d9bf"
+}

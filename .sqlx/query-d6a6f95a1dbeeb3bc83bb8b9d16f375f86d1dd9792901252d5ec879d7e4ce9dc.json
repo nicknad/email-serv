@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT 1 as \"one: i64\" FROM email_outbox WHERE subscriber_id = ? AND email_type = 'verification' LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "one: i64",
+        "ordinal": 0,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d6a6f95a1dbeeb3bc83bb8b9d16f375f86d1dd9792901252d5ec879d7e4ce9dc"
+}

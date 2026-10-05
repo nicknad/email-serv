@@ -1,0 +1,68 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id!: i64\", email_type, recipient_email, subscriber_id as \"subscriber_id!: i64\", subject, template_path, context_json, retry_count as \"retry_count!: i32\", broadcast_id FROM email_outbox WHERE status = 'pending' ORDER BY created_at ASC LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "email_type",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "recipient_email",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "subscriber_id!: i64",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "subject",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "template_path",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "context_json",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "retry_count!: i32",
+        "ordinal": 7,
+        "type_info": "Integer"
+      },
+      {
+        "name": "broadcast_id",
+        "ordinal": 8,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "85e3b611fed3349b32f6dc260b4bb0ffd34ce747c4cad88a3a40f738a05f3609"
+}

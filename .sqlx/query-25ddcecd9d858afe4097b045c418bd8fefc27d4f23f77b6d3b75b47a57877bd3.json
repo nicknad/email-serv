@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM subscriptions WHERE email_hash = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "25ddcecd9d858afe4097b045c418bd8fefc27d4f23f77b6d3b75b47a57877bd3"
+}
